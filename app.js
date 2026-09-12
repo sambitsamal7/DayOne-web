@@ -1,10 +1,10 @@
 // ==========================================================================
-// LIFE RPG - GAME LOGIC & SUPABASE INTEGRATION
+// LIFE RPG - GAME LOGIC, AUDIO ENGINE & PERSISTENCE
 // ==========================================================================
 
 // 1. SUPABASE CLIENT INITIALIZATION
 const SUPABASE_URL = 'https://gqinymrhijiardfjvkoh.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdxaW55bXJoaWppYXJkZmp2a29oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMzQ1NjcsImV4cCI6MjA1NjgxMDU2N30.PLACEHOLDER'; // Ensure your key matches index.html
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdxaW55bXJoaWppYXJkZmp2a29oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMzQ1NjcsImV4cCI6MjA1NjgxMDU2N30.PLACEHOLDER';
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // State cache
@@ -23,7 +23,59 @@ let userData = {
 let bossHp = 500;
 const maxBossHp = 500;
 
-// 2. DOM ELEMENTS
+// 2. AUDIO SYNTHESIZER ENGINE (ZERO EXTERNAL ASSETS)
+const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+
+function playSound(type) {
+  try {
+    if (!audioCtx) audioCtx = new AudioContextClass();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    const now = audioCtx.currentTime;
+
+    if (type === 'click') {
+      osc.frequency.setValueAtTime(600, now);
+      osc.frequency.exponentialRampToValueAtTime(300, now + 0.04);
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+      osc.start(now);
+      osc.stop(now + 0.04);
+    } else if (type === 'attack') {
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(300, now);
+      osc.frequency.exponentialRampToValueAtTime(80, now + 0.12);
+      gain.gain.setValueAtTime(0.15, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+      osc.start(now);
+      osc.stop(now + 0.12);
+    } else if (type === 'levelUp') {
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(440, now);
+      osc.frequency.exponentialRampToValueAtTime(880, now + 0.25);
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+      osc.start(now);
+      osc.stop(now + 0.25);
+    }
+  } catch (err) {
+    console.warn('Audio play error:', err);
+  }
+}
+
+// Global UI Click Sound
+document.addEventListener('click', (e) => {
+  if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+    playSound('click');
+  }
+});
+
+// 3. DOM ELEMENTS
 const authContainer = document.getElementById('auth-container');
 const gameDashboard = document.getElementById('game-dashboard');
 const authEmail = document.getElementById('auth-email');
@@ -49,17 +101,16 @@ const questListEl = document.getElementById('quest-list');
 const bossHpTextEl = document.getElementById('boss-hp-text');
 const bossHpTrack = document.querySelector('.boss-hp-track');
 const btnAttackBoss = document.getElementById('btn-attack-boss');
+const bossCard = document.querySelector('.boss-card');
 
-// 3. EVENT LISTENERS
+// 4. EVENT LISTENERS & INITIALIZATION
 document.addEventListener('DOMContentLoaded', initApp);
-
 btnLogin.addEventListener('click', handleLogin);
 btnSignup.addEventListener('click', handleSignup);
 btnLogout.addEventListener('click', handleLogout);
 questForm.addEventListener('submit', handleAddQuest);
 btnAttackBoss.addEventListener('click', handleAttackBoss);
 
-// 4. AUTHENTICATION & INITIALIZATION
 async function initApp() {
   const { data: { session } } = await supabaseClient.auth.getSession();
   if (session) {
@@ -124,17 +175,13 @@ async function createInitialProfile(userId, email) {
   };
 
   const { error } = await supabaseClient.from('user_data').insert([newProfile]);
-  if (error) {
-    console.error('Error creating profile:', error);
-  } else {
-    userData = newProfile;
-  }
+  if (!error) userData = newProfile;
 }
 
 async function loadUserData() {
   if (!currentUser) return;
 
-  const { data, error } = await supabaseClient
+  const { data } = await supabaseClient
     .from('user_data')
     .select('*')
     .eq('id', currentUser.id)
@@ -144,8 +191,6 @@ async function loadUserData() {
     userData = data;
     updateUI();
     loadQuests();
-  } else if (error) {
-    console.error('Error fetching user data:', error);
   }
 }
 
@@ -154,7 +199,7 @@ async function saveUserData() {
   await supabaseClient.from('user_data').upsert(userData);
 }
 
-// 6. QUEST SYSTEM
+// 6. QUEST ENGINE
 async function handleAddQuest(e) {
   e.preventDefault();
   const title = questTitleInput.value.trim();
@@ -184,9 +229,7 @@ async function loadQuests() {
     .eq('user_id', currentUser.id)
     .eq('completed', false);
 
-  if (data) {
-    data.forEach(renderQuestItem);
-  }
+  if (data) data.forEach(renderQuestItem);
 }
 
 function renderQuestItem(quest) {
@@ -207,35 +250,37 @@ window.completeQuest = async function(questId, attribute) {
   const el = document.getElementById(`quest-${questId}`);
   if (el) el.remove();
 
-  // Gain XP & Gold
   userData.xp += 35;
   userData.gold += 15;
 
   if (attribute === 'STR') userData.strength += 1;
   if (attribute === 'INT') userData.intellect += 1;
 
-  // Check Level Up
   if (userData.xp >= userData.max_xp) {
     userData.level += 1;
     userData.xp -= userData.max_xp;
     userData.max_xp = Math.floor(userData.max_xp * 1.5);
-    celebrateLevelUp(); // JUICE ANIMATION
+    celebrateLevelUp();
   }
 
   updateUI();
   saveUserData();
 };
 
-// 7. DUNGEON BOSS ENGINE
+// 7. DUNGEON COMBAT & FLOATING DAMAGE NUMBERS
 function handleAttackBoss() {
+  playSound('attack');
   const damage = userData.strength * 2 + userData.intellect;
   bossHp = Math.max(0, bossHp - damage);
+
+  showFloatingText(`-${damage}`, bossCard);
 
   const fillPct = (bossHp / maxBossHp) * 100;
   bossHpTrack.style.setProperty('--fill', `${fillPct}%`);
   bossHpTextEl.innerText = `${bossHp} / ${maxBossHp}`;
 
   if (bossHp === 0) {
+    celebrateLevelUp();
     alert('🎉 BOSS DEFEATED! Earned 100 Bonus Gold!');
     userData.gold += 100;
     bossHp = maxBossHp;
@@ -246,14 +291,41 @@ function handleAttackBoss() {
   }
 }
 
-// 8. VISUAL JUICE MOMENT (SCREEN FLASH + PARTICLE BURST)
+function showFloatingText(text, targetEl) {
+  const rect = targetEl.getBoundingClientRect();
+  const pop = document.createElement('div');
+  pop.innerText = text;
+  pop.style.cssText = `
+    position: fixed;
+    top: ${rect.top + 30}px;
+    left: ${rect.left + rect.width / 2}px;
+    color: var(--accent-red);
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 800;
+    font-size: 1.5rem;
+    pointer-events: none;
+    z-index: 9999;
+    text-shadow: 0 0 10px var(--accent-red);
+  `;
+  document.body.appendChild(pop);
+
+  pop.animate([
+    { transform: 'translate(-50%, 0) scale(1)', opacity: 1 },
+    { transform: 'translate(-50%, -45px) scale(1.3)', opacity: 0 }
+  ], { duration: 600, easing: 'ease-out' });
+
+  setTimeout(() => pop.remove(), 600);
+}
+
+// 8. VISUAL JUICE MOMENT
 function celebrateLevelUp() {
-  // Radial Cyan Screen Flash
+  playSound('levelUp');
+
   const flash = document.createElement('div');
   flash.style.cssText = `
     position: fixed;
     inset: 0;
-    background: radial-gradient(circle, rgba(0, 240, 255, 0.35), transparent 75%);
+    background: radial-gradient(circle, rgba(0, 240, 255, 0.4), transparent 75%);
     pointer-events: none;
     z-index: 9999;
     animation: flashPulse 0.6s ease-out forwards;
@@ -261,7 +333,6 @@ function celebrateLevelUp() {
   document.body.appendChild(flash);
   setTimeout(() => flash.remove(), 600);
 
-  // 24 Particle Radial Burst
   for (let i = 0; i < 24; i++) {
     const p = document.createElement('div');
     const angle = (Math.PI * 2 * i) / 24;
@@ -283,16 +354,13 @@ function celebrateLevelUp() {
     p.animate([
       { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
       { transform: `translate(${Math.cos(angle) * dist - 50}%, ${Math.sin(angle) * dist - 50}%) scale(0)`, opacity: 0 }
-    ], {
-      duration: 750,
-      easing: 'ease-out'
-    });
+    ], { duration: 750, easing: 'ease-out' });
 
     setTimeout(() => p.remove(), 750);
   }
 }
 
-// 9. UI UPDATE & HELPER FUNCTIONS
+// 9. UI UPDATE HELPERS
 function updateUI() {
   heroEmailEl.innerText = userData.email || 'HERO PROFILE';
   heroTitleBadgeEl.innerText = userData.title || 'Shadow Initiate';
@@ -303,7 +371,6 @@ function updateUI() {
   attrStrEl.innerText = userData.strength;
   attrIntEl.innerText = userData.intellect;
 
-  // Set CSS progress bar fill variable
   const fillPct = (userData.xp / userData.max_xp) * 100;
   xpBarTrack.style.setProperty('--fill', `${fillPct}%`);
 }
