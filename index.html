@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Life RPG — Tech Zephyr 4.0</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Auth Section -->
+    <div id="auth-screen" class="card">
+      <h1>⚔️ Life RPG</h1>
+      <p class="subtitle">Turn your daily tasks into epic quest progression</p>
+      <form id="auth-form">
+        <input type="email" id="email" placeholder="Hero Email" required />
+        <input type="password" id="password" placeholder="Passcode" required />
+        <button type="submit" id="auth-btn">Enter the Realm (Login / Signup)</button>
+      </form>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboard" class="hidden">
+      <header class="card flex-header">
+        <div>
+          <h2 id="user-display">Welcome, Hero</h2>
+          <button id="logout-btn">Logout</button>
+        </div>
+        <div class="streak-badge">
+          🔥 Streak: <span id="streak-count">1</span> Days
+        </div>
+      </header>
+
+      <!-- Stats Bar -->
+      <div class="card grid-stats">
+        <div class="stat-box">
+          <h3>Level <span id="user-level">1</span></h3>
+          <div class="progress-bg"><div id="xp-bar" class="progress-fill"></div></div>
+          <p><span id="user-xp">0</span> / <span id="max-xp">100</span> XP</p>
+        </div>
+        <div class="stat-box">
+          <h3>🪙 Gold</h3>
+          <p class="stat-val" id="user-gold">0</p>
+        </div>
+        <div class="stat-box">
+          <h3>💪 Strength</h3>
+          <p class="stat-val" id="stat-str">10</p>
+        </div>
+        <div class="stat-box">
+          <h3>🧠 Intellect</h3>
+          <p class="stat-val" id="stat-int">10</p>
+        </div>
+      </div>
+
+      <!-- Task Creator -->
+      <div class="card">
+        <h3>📜 Post New Quest</h3>
+        <form id="task-form">
+          <input type="text" id="task-title" placeholder="Quest Title (e.g., Hit the Gym, Code React)" required />
+          <select id="task-attr">
+            <option value="STR">Attribute: Strength 💪</option>
+            <option value="INT">Attribute: Intellect 🧠</option>
+          </select>
+          <button type="submit">+ Add Quest</button>
+        </form>
+      </div>
+
+      <!-- Task List -->
+      <div class="card">
+        <h3>🗡️ Active Quests</h3>
+        <ul id="task-list"></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

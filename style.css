@@ -1,0 +1,22 @@
+* { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+body { background: #0f172a; color: #f8fafc; margin: 0; padding: 20px; display: flex; justify-content: center; }
+#app { width: 100%; max-width: 800px; }
+.card { background: #1e293b; padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #334155; }
+.hidden { display: none !important; }
+h1, h2, h3 { margin-top: 0; color: #38bdf8; }
+.subtitle { color: #94a3b8; }
+input, select, button { width: 100%; padding: 12px; margin-top: 10px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; }
+button { background: #0284c7; font-weight: bold; cursor: pointer; transition: 0.2s; }
+button:hover { background: #0369a1; }
+.flex-header { display: flex; justify-content: space-between; align-items: center; }
+.streak-badge { background: #c2410c; padding: 10px 16px; border-radius: 20px; font-weight: bold; }
+.grid-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
+.stat-box { background: #0f172a; padding: 15px; border-radius: 8px; text-align: center; }
+.stat-val { font-size: 24px; font-weight: bold; color: #f59e0b; margin: 5px 0 0 0; }
+.progress-bg { background: #334155; height: 12px; border-radius: 6px; overflow: hidden; margin: 10px 0; }
+.progress-fill { background: #10b981; height: 100%; width: 0%; transition: width 0.3s; }
+ul { list-style: none; padding: 0; }
+li { background: #0f172a; padding: 12px 16px; margin-top: 8px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
+.task-actions button { width: auto; padding: 6px 12px; margin: 0 4px; }
+.btn-done { background: #10b981; }
+.btn-del { background: #ef4444; }
