@@ -6,11 +6,19 @@ Life RPG converts real-world productivity tasks into a dark-mode fantasy RPG pro
 
 ---
 
-## 🚀 Tech Stack
+## 👥 Team Details & Authors
 
-- **Frontend**: Vanilla HTML5, CSS3 (Obsidian/Marble Dark Theme), Modern JavaScript (ES6+)
+- **Team Name**: Team DayOne
+- **Lead Developer**: Sambit Samal
+
+---
+
+## 🚀 Tech Stack & AI Disclosures
+
+- **Frontend**: Vanilla HTML5, CSS3 (Obsidian Dark Theme), Modern JavaScript (ES6+)
 - **Backend & Database**: Supabase (PostgreSQL, Row-Level Security, Native Auth)
 - **Audio Engine**: Web Audio API (Synthesized SFX)
+- **AI Tooling Disclosure**: Google Gemini was utilized for architectural guidance, documentation scaffolding, and code refactoring as permitted under submission guidelines.
 
 ---
 
