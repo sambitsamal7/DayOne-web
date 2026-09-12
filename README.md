@@ -1,17 +1,31 @@
-# Life RPG — Tech Zephyr 4.0
+# ⚔️ Life RPG — Gamified Task & Progression Engine
 
-## Live Demo
-https://sambitsamal7.github.io/DayOne-web/
+> **Tech Zephyr 4.0 Hackathon Submission** | **Team DayOne**
 
-## Team Name: DayOne
-- Team Leader: Sambit Samal
-- Member 2: Anshuman Swain
-- Member 3: Omjyoti Baliarsingh
-- Member 4: Om Kumar
+Life RPG converts real-world productivity tasks into a dark-mode fantasy RPG progression engine featuring real-time authentication, dynamic streak mechanics, an item shop, and dungeon boss fights.
 
-## Project Overview
-A gamified task management application translating real-world daily tasks into an interactive RPG progression system.
+---
 
-## Disclosures & Declarations
-- **AI Tools Used:** Gemini (for architectural guidance and UI boilerplates)
-- **Frameworks & Libraries:** React / Next.js, Tailwind CSS, Supabase
+## 🚀 Tech Stack
+
+- **Frontend**: Vanilla HTML5, CSS3 (Obsidian/Marble Dark Theme), Modern JavaScript (ES6+)
+- **Backend & Database**: Supabase (PostgreSQL, Row-Level Security, Native Auth)
+- **Audio Engine**: Web Audio API (Synthesized SFX)
+
+---
+
+## ✨ Core Features
+
+1. **Real-time Authentication**: Email/Password Sign Up & Sign In powered by Supabase Auth.
+2. **Cloud Persistence**: Full PostgreSQL database storage replacing local browser memory.
+3. **Dynamic Streak Calculation**: Tracks daily logins with automated consecutive-day logic.
+4. **Interactive Economy & Boss Arena**: Earn Gold to purchase gear or deal damage to dungeon bosses.
+
+---
+
+## 🛠️ Local Setup Instructions
+
+1. **Clone the repository**:
+   ```bash
+   git clone [https://github.com/sambitsamal7/DayOne-web.git](https://github.com/sambitsamal7/DayOne-web.git)
+   cd DayOne-web

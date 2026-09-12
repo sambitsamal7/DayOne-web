@@ -3,7 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Life RPG — Tech Zephyr 4.0</title>
+  
+  <!-- SEO Meta Tags -->
+  <title>Life RPG — Turn Productivity into Fantasy Progression</title>
+  <meta name="description" content="A high-end MCU-aesthetic gamified task manager built with HTML, CSS, JavaScript, and Supabase for Tech Zephyr 4.0.">
+  <meta name="keywords" content="Life RPG, Gamified Productivity, Hackathon, Supabase, Web Audio API">
+  <meta name="author" content="Team DayOne">
+
+  <!-- Open Graph / Social Media Meta Tags -->
+  <meta property="og:title" content="Life RPG — Tech Zephyr 4.0 Submission">
+  <meta property="og:description" content="Turn your daily goals into XP, Gold, and Boss Battles with real-time Supabase cloud persistence.">
+  <meta property="og:type" content="website">
+
+  <!-- Supabase JS Client SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
@@ -17,9 +31,10 @@
       </div>
       <p class="subtitle">Turn daily productivity into an immersive fantasy progression engine</p>
       <div class="auth-input-group">
-        <input type="email" id="email" placeholder="Hero Email Address" />
-        <input type="password" id="password" placeholder="Passcode" />
-        <button type="button" id="login-btn">Enter the Realm</button>
+        <input type="email" id="email" placeholder="Hero Email Address" required aria-label="Hero Email Address" />
+        <input type="password" id="password" placeholder="Passcode (min 6 chars)" required aria-label="Passcode" />
+        <button type="button" id="login-btn" aria-label="Log In Button">Log In</button>
+        <button type="button" id="signup-btn" aria-label="Sign Up Button" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); margin-top: 8px;">Sign Up New Hero</button>
       </div>
     </div>
 
@@ -31,15 +46,15 @@
           <span>⚔️</span> <h2>Life RPG</h2>
         </div>
         <nav class="nav-menu">
-          <button class="nav-btn active" data-tab="tab-quests">📜 Active Quests</button>
-          <button class="nav-btn" data-tab="tab-profile">👤 Hero Profile</button>
-          <button class="nav-btn" data-tab="tab-character">🛡️ Character Sheet</button>
-          <button class="nav-btn" data-tab="tab-shop">🛒 Item Shop</button>
-          <button class="nav-btn" data-tab="tab-boss">🐉 Dungeon Boss</button>
+          <button class="nav-btn active" data-tab="tab-quests" aria-label="Active Quests Tab">📜 Active Quests</button>
+          <button class="nav-btn" data-tab="tab-profile" aria-label="Hero Profile Tab">👤 Hero Profile</button>
+          <button class="nav-btn" data-tab="tab-character" aria-label="Character Sheet Tab">🛡️ Character Sheet</button>
+          <button class="nav-btn" data-tab="tab-shop" aria-label="Item Shop Tab">🛒 Item Shop</button>
+          <button class="nav-btn" data-tab="tab-boss" aria-label="Dungeon Boss Tab">🐉 Dungeon Boss</button>
         </nav>
         <div class="user-meta">
           <p id="user-display">Hero</p>
-          <button id="logout-btn">Logout</button>
+          <button id="logout-btn" aria-label="Logout Button">Logout</button>
         </div>
       </aside>
 
@@ -61,12 +76,12 @@
           <div class="card">
             <h3>📜 Post New Quest</h3>
             <form id="task-form" class="inline-form">
-              <input type="text" id="task-title" placeholder="Quest Title (e.g. Code for 2 Hours)" required />
-              <select id="task-attr">
+              <input type="text" id="task-title" placeholder="Quest Title (e.g. Code for 2 Hours)" required aria-label="Quest Title" />
+              <select id="task-attr" aria-label="Attribute Selection">
                 <option value="STR">Attribute: Strength 💪</option>
                 <option value="INT">Attribute: Intellect 🧠</option>
               </select>
-              <button type="submit">+ Post Quest</button>
+              <button type="submit" aria-label="Post Quest Button">+ Post Quest</button>
             </form>
           </div>
 
@@ -76,7 +91,7 @@
           </div>
         </section>
 
-        <!-- TAB 2: HERO PROFILE (NEW) -->
+        <!-- TAB 2: HERO PROFILE -->
         <section id="tab-profile" class="tab-content hidden">
           <div class="card profile-header-card">
             <div class="avatar-box">
@@ -92,8 +107,8 @@
           <div class="card">
             <h3>⚙️ Customization & Identity</h3>
             <div class="inline-form" style="grid-template-columns: 2fr 1fr;">
-              <input type="text" id="custom-title-input" placeholder="Custom Hero Title (e.g. Code Mage)" />
-              <button type="button" id="save-profile-btn">Update Profile</button>
+              <input type="text" id="custom-title-input" placeholder="Custom Hero Title (e.g. Code Mage)" aria-label="Custom Hero Title Input" />
+              <button type="button" id="save-profile-btn" aria-label="Update Profile Button">Update Profile</button>
             </div>
           </div>
 
@@ -142,17 +157,17 @@
               <div class="shop-card">
                 <h4>Iron Sword</h4>
                 <p>+5 Strength 💪</p>
-                <button onclick="buyItem('Iron Sword', 50, 'STR', 5)">Buy (50 Gold)</button>
+                <button onclick="buyItem('Iron Sword', 50, 'STR', 5)" aria-label="Buy Iron Sword">Buy (50 Gold)</button>
               </div>
               <div class="shop-card">
                 <h4>Wizard Scroll</h4>
                 <p>+5 Intellect 🧠</p>
-                <button onclick="buyItem('Wizard Scroll', 50, 'INT', 5)">Buy (50 Gold)</button>
+                <button onclick="buyItem('Wizard Scroll', 50, 'INT', 5)" aria-label="Buy Wizard Scroll">Buy (50 Gold)</button>
               </div>
               <div class="shop-card">
                 <h4>XP Potion</h4>
                 <p>+50 Instant XP ⚡</p>
-                <button onclick="buyPotion(30)">Buy (30 Gold)</button>
+                <button onclick="buyPotion(30)" aria-label="Buy XP Potion">Buy (30 Gold)</button>
               </div>
             </div>
           </div>
@@ -166,7 +181,7 @@
               <div id="boss-hp" class="boss-hp-fill" style="width: 100%;"></div>
             </div>
             <p>Boss Health: <span id="boss-hp-text">500 / 500</span> HP</p>
-            <button id="attack-boss-btn">⚔️ Attack Boss (Requires 10 Gold)</button>
+            <button id="attack-boss-btn" aria-label="Attack Boss Button">⚔️ Attack Boss (Requires 10 Gold)</button>
           </div>
         </section>
       </main>
