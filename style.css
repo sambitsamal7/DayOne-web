@@ -14,7 +14,6 @@
 
 * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
 
-/* Obsidian & Marble Textured Background */
 body {
   background-color: var(--bg-dark);
   background-image: 
@@ -34,7 +33,6 @@ body {
 
 #app { width: 100%; max-width: 1100px; }
 
-/* MCU High-Tech Card Frame */
 .card {
   background: var(--card-bg);
   backdrop-filter: blur(20px);
@@ -62,7 +60,6 @@ body {
 
 .hidden { display: none !important; }
 
-/* Black Aesthetic Auth Screen */
 .auth-card {
   max-width: 440px;
   margin: 100px auto;
@@ -127,7 +124,6 @@ button:hover {
   box-shadow: 0 6px 25px rgba(0, 240, 255, 0.6);
 }
 
-/* Dashboard Layout */
 .app-container { display: grid; grid-template-columns: 240px 1fr; gap: 20px; }
 
 .sidebar {
@@ -175,7 +171,6 @@ button:hover {
 }
 #logout-btn:hover { background: var(--accent-red); color: white; }
 
-/* Top Header Bar */
 .top-bar { display: flex; align-items: center; gap: 16px; }
 .stat-pill {
   background: rgba(4, 6, 10, 0.8);
@@ -193,7 +188,29 @@ button:hover {
 .progress-bg { background: rgba(255, 255, 255, 0.05); height: 8px; border-radius: 10px; overflow: hidden; }
 .progress-fill { background: linear-gradient(90deg, var(--accent-cyan), var(--accent-green)); height: 100%; width: 0%; box-shadow: 0 0 10px var(--accent-cyan); }
 
-/* Task Elements */
+/* Profile Tab Unique Styles */
+.profile-header-card { display: flex; align-items: center; gap: 20px; }
+.avatar-box {
+  width: 70px; height: 70px;
+  background: rgba(0, 240, 255, 0.1);
+  border: 2px solid var(--accent-cyan);
+  border-radius: 50%;
+  display: flex; justify-content: center; align-items: center;
+  font-size: 2.2rem;
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+}
+.title-badge {
+  display: inline-block;
+  background: rgba(157, 78, 221, 0.2);
+  color: var(--accent-purple);
+  border: 1px solid rgba(157, 78, 221, 0.4);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  margin-top: 4px;
+}
+
 .inline-form { display: grid; grid-template-columns: 2fr 1.2fr 1fr; gap: 10px; align-items: center; }
 .inline-form input, .inline-form select, .inline-form button { margin: 0; }
 
@@ -215,7 +232,6 @@ li:hover { border-color: rgba(0, 240, 255, 0.3); transform: translateX(4px); }
 .btn-done { background: linear-gradient(135deg, var(--accent-green), #00b4d8); }
 .btn-del { background: transparent; border: 1px solid rgba(255, 0, 85, 0.3); color: var(--accent-red); box-shadow: none; }
 
-/* Grid Sections */
 .grid-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .stat-box { background: rgba(4, 6, 10, 0.6); padding: 20px; border-radius: 14px; text-align: center; border: 1px solid var(--border-color); }
 .stat-icon { font-size: 2rem; }
@@ -224,7 +240,6 @@ li:hover { border-color: rgba(0, 240, 255, 0.3); transform: translateX(4px); }
 .shop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 .shop-card { background: rgba(4, 6, 10, 0.6); padding: 18px; border-radius: 14px; border: 1px solid var(--border-color); text-align: center; }
 
-/* Boss Arena */
 .boss-card { text-align: center; }
 .boss-hp-bar { background: rgba(255, 255, 255, 0.05); height: 22px; border-radius: 11px; overflow: hidden; margin: 16px 0; border: 1px solid var(--border-color); }
 .boss-hp-fill { background: linear-gradient(90deg, var(--accent-red), #90e0ef); height: 100%; box-shadow: 0 0 12px var(--accent-red); }

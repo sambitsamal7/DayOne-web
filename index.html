@@ -32,6 +32,7 @@
         </div>
         <nav class="nav-menu">
           <button class="nav-btn active" data-tab="tab-quests">📜 Active Quests</button>
+          <button class="nav-btn" data-tab="tab-profile">👤 Hero Profile</button>
           <button class="nav-btn" data-tab="tab-character">🛡️ Character Sheet</button>
           <button class="nav-btn" data-tab="tab-shop">🛒 Item Shop</button>
           <button class="nav-btn" data-tab="tab-boss">🐉 Dungeon Boss</button>
@@ -75,7 +76,40 @@
           </div>
         </section>
 
-        <!-- TAB 2: CHARACTER SHEET -->
+        <!-- TAB 2: HERO PROFILE (NEW) -->
+        <section id="tab-profile" class="tab-content hidden">
+          <div class="card profile-header-card">
+            <div class="avatar-box">
+              <span id="profile-avatar">🧙‍♂️</span>
+            </div>
+            <div class="profile-info">
+              <h2 id="profile-name">Hero Name</h2>
+              <p id="profile-title" class="title-badge">Rank I: Shadow Initiate</p>
+              <p class="subtitle" style="margin: 4px 0 0 0;">Class: Web Developer & Quest Master</p>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>⚙️ Customization & Identity</h3>
+            <div class="inline-form" style="grid-template-columns: 2fr 1fr;">
+              <input type="text" id="custom-title-input" placeholder="Custom Hero Title (e.g. Code Mage)" />
+              <button type="button" id="save-profile-btn">Update Profile</button>
+            </div>
+          </div>
+
+          <div class="card grid-stats">
+            <div class="stat-box">
+              <h4>Quests Completed</h4>
+              <p class="stat-val" id="profile-completed-count" style="color:var(--accent-cyan)">0</p>
+            </div>
+            <div class="stat-box">
+              <h4>Total Gold Accumulated</h4>
+              <p class="stat-val" id="profile-total-gold">0</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 3: CHARACTER SHEET -->
         <section id="tab-character" class="tab-content hidden">
           <div class="card grid-stats">
             <div class="stat-box">
@@ -99,7 +133,7 @@
           </div>
         </section>
 
-        <!-- TAB 3: ITEM SHOP -->
+        <!-- TAB 4: ITEM SHOP -->
         <section id="tab-shop" class="tab-content hidden">
           <div class="card">
             <h3>🛒 Merchant Shop</h3>
@@ -124,7 +158,7 @@
           </div>
         </section>
 
-        <!-- TAB 4: DUNGEON BOSS -->
+        <!-- TAB 5: DUNGEON BOSS -->
         <section id="tab-boss" class="tab-content hidden">
           <div class="card boss-card">
             <h3>🐉 Boss Arena: Shadow Dragon</h3>

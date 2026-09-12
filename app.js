@@ -27,7 +27,7 @@ const playSFX = (type) => {
 
 // Application State
 let currentUser = null;
-let userData = { level: 1, xp: 0, maxXp: 100, gold: 0, str: 10, int: 10, streak: 1, inventory: [] };
+let userData = { level: 1, xp: 0, maxXp: 100, gold: 0, str: 10, int: 10, streak: 1, inventory: [], completedCount: 0, customTitle: "Rank I: Shadow Initiate" };
 let tasks = [];
 let bossHP = 500;
 
@@ -69,7 +69,7 @@ function loadUserData() {
   const saved = localStorage.getItem(`rpg_full_${currentUser}`);
   if (saved) {
     const data = JSON.parse(saved);
-    userData = data.userData;
+    userData = { ...userData, ...data.userData };
     tasks = data.tasks || [];
     bossHP = data.bossHP !== undefined ? data.bossHP : 500;
   } else {
@@ -92,6 +92,13 @@ function updateUI() {
   document.getElementById('stat-str').innerText = userData.str;
   document.getElementById('stat-int').innerText = userData.int;
   document.getElementById('streak-count').innerText = userData.streak;
+
+  // Profile UI Updates
+  const heroName = currentUser ? currentUser.split('@')[0] : "Hero";
+  document.getElementById('profile-name').innerText = heroName;
+  document.getElementById('profile-title').innerText = userData.customTitle;
+  document.getElementById('profile-completed-count').innerText = userData.completedCount || 0;
+  document.getElementById('profile-total-gold').innerText = userData.gold;
 
   const pct = (userData.xp / userData.maxXp) * 100;
   document.getElementById('xp-bar').style.width = `${pct}%`;
@@ -144,6 +151,8 @@ window.completeTask = function(id) {
     playSFX('complete');
     userData.xp += 50;
     userData.gold += 25;
+    userData.completedCount = (userData.completedCount || 0) + 1;
+
     if (task.attr === 'STR') userData.str += 2;
     if (task.attr === 'INT') userData.int += 2;
 
@@ -166,6 +175,18 @@ window.deleteTask = function(id) {
   saveData();
   updateUI();
 };
+
+// Save Profile Custom Title
+document.getElementById('save-profile-btn').addEventListener('click', () => {
+  const val = document.getElementById('custom-title-input').value.trim();
+  if (val) {
+    userData.customTitle = val;
+    document.getElementById('custom-title-input').value = '';
+    saveData();
+    updateUI();
+    alert('Hero Profile Title Updated!');
+  }
+});
 
 // Shop System Actions
 window.buyItem = function(name, cost, stat, boost) {
