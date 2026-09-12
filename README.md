@@ -1,5 +1,8 @@
 # Life RPG — Tech Zephyr 4.0
 
+## Live Demo
+https://sambitsamal7.github.io/DayOne-web/
+
 ## Team Name: DayOne
 - Team Leader: Sambit Samal
 - Member 2: Anshuman Swain
