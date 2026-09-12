@@ -5,78 +5,140 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Life RPG — Tech Zephyr 4.0</title>
   <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
   <div id="app">
-    <!-- Auth Section -->
-    <div id="auth-screen" class="card">
-      <h1>⚔️ Life RPG</h1>
-      <p class="subtitle">Turn your daily tasks into epic quest progression</p>
+    <!-- Auth Screen -->
+    <div id="auth-screen" class="card auth-card">
+      <div class="brand">
+        <span class="logo-icon">⚔️</span>
+        <h1>Life RPG</h1>
+      </div>
+      <p class="subtitle">Turn daily productivity into an immersive fantasy progression engine</p>
       <form id="auth-form">
-        <input type="email" id="email" placeholder="Hero Email" required />
+        <input type="email" id="email" placeholder="Hero Email Address" required />
         <input type="password" id="password" placeholder="Passcode" required />
-        <button type="submit" id="auth-btn">Enter the Realm (Login / Signup)</button>
+        <button type="submit">Enter the Realm</button>
       </form>
     </div>
 
-    <!-- Main Dashboard -->
-    <div id="dashboard" class="hidden">
-      <header class="card flex-header">
-        <div>
-          <h2 id="user-display">Welcome, Hero</h2>
+    <!-- Main Dashboard Layout -->
+    <div id="dashboard" class="hidden app-container">
+      <!-- Sidebar Navigation -->
+      <aside class="sidebar card">
+        <div class="brand-mini">
+          <span>⚔️</span> <h2>Life RPG</h2>
+        </div>
+        <nav class="nav-menu">
+          <button class="nav-btn active" data-tab="tab-quests">📜 Active Quests</button>
+          <button class="nav-btn" data-tab="tab-character">🛡️ Character Sheet</button>
+          <button class="nav-btn" data-tab="tab-shop">🛒 Item Shop</button>
+          <button class="nav-btn" data-tab="tab-boss">🐉 Dungeon Boss</button>
+        </nav>
+        <div class="user-meta">
+          <p id="user-display">Hero</p>
           <button id="logout-btn">Logout</button>
         </div>
-        <div class="streak-badge">
-          🔥 Streak: <span id="streak-count">1</span> Days
-        </div>
-      </header>
+      </aside>
 
-      <!-- Stats Bar -->
-      <div class="card grid-stats">
-        <div class="stat-box">
-          <h3>Level <span id="user-level">1</span></h3>
-          <div class="progress-bg"><div id="xp-bar" class="progress-fill"></div></div>
-          <p><span id="user-xp">0</span> / <span id="max-xp">100</span> XP</p>
-        </div>
-        <div class="stat-box">
-          <h3>🪙 Gold</h3>
-          <p class="stat-val" id="user-gold">0</p>
-        </div>
-        <div class="stat-box">
-          <h3>💪 Strength</h3>
-          <p class="stat-val" id="stat-str">10</p>
-        </div>
-        <div class="stat-box">
-          <h3>🧠 Intellect</h3>
-          <p class="stat-val" id="stat-int">10</p>
-        </div>
-      </div>
+      <!-- Main Content Area -->
+      <main class="main-content">
+        <!-- Top Stats Header Bar -->
+        <header class="card top-bar">
+          <div class="stat-pill">🔥 Streak: <span id="streak-count">1</span>d</div>
+          <div class="stat-pill gold">🪙 <span id="user-gold">0</span> Gold</div>
+          <div class="stat-pill lvl">Lvl <span id="user-level">1</span></div>
+          <div class="xp-wrapper">
+            <div class="xp-text"><span id="user-xp">0</span> / <span id="max-xp">100</span> XP</div>
+            <div class="progress-bg"><div id="xp-bar" class="progress-fill"></div></div>
+          </div>
+        </header>
 
-      <!-- Task Creator -->
-      <div class="card">
-        <h3>📜 Post New Quest</h3>
-        <form id="task-form">
-          <input type="text" id="task-title" placeholder="Quest Title (e.g., Hit the Gym, Code React)" required />
-          <select id="task-attr">
-            <option value="STR">Attribute: Strength 💪</option>
-            <option value="INT">Attribute: Intellect 🧠</option>
-          </select>
-          <button type="submit">+ Add Quest</button>
-        </form>
-      </div>
+        <!-- TAB 1: QUESTS (Dashboard) -->
+        <section id="tab-quests" class="tab-content">
+          <div class="card">
+            <h3>📜 Post New Quest</h3>
+            <form id="task-form" class="inline-form">
+              <input type="text" id="task-title" placeholder="Quest Title (e.g. Code for 2 Hours)" required />
+              <select id="task-attr">
+                <option value="STR">Attribute: Strength 💪</option>
+                <option value="INT">Attribute: Intellect 🧠</option>
+              </select>
+              <button type="submit">+ Post Quest</button>
+            </form>
+          </div>
 
-      <!-- Task List -->
-      <div class="card">
-        <h3>🗡️ Active Quests</h3>
-        <ul id="task-list"></ul>
-      </div>
+          <div class="card">
+            <h3>🗡️ Active Quests</h3>
+            <ul id="task-list"></ul>
+          </div>
+        </section>
+
+        <!-- TAB 2: CHARACTER SHEET -->
+        <section id="tab-character" class="tab-content hidden">
+          <div class="card grid-stats">
+            <div class="stat-box">
+              <div class="stat-icon">💪</div>
+              <h4>Strength</h4>
+              <p class="stat-val" id="stat-str">10</p>
+              <small>Boosts Quest XP gain</small>
+            </div>
+            <div class="stat-box">
+              <div class="stat-icon">🧠</div>
+              <h4>Intellect</h4>
+              <p class="stat-val" id="stat-int">10</p>
+              <small>Boosts Gold drops</small>
+            </div>
+          </div>
+          <div class="card">
+            <h3>🛡️ Equipped Gear</h3>
+            <div id="equipped-list" class="gear-grid">
+              <p class="text-muted">No gear equipped yet. Visit the Item Shop!</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 3: ITEM SHOP -->
+        <section id="tab-shop" class="tab-content hidden">
+          <div class="card">
+            <h3>🛒 Merchant Shop</h3>
+            <p class="subtitle">Spend earned gold to buy equipment and stat boosters</p>
+            <div class="shop-grid">
+              <div class="shop-card">
+                <h4>Iron Sword</h4>
+                <p>+5 Strength 💪</p>
+                <button onclick="buyItem('Iron Sword', 50, 'STR', 5)">Buy (50 Gold)</button>
+              </div>
+              <div class="shop-card">
+                <h4>Wizard Scroll</h4>
+                <p>+5 Intellect 🧠</p>
+                <button onclick="buyItem('Wizard Scroll', 50, 'INT', 5)">Buy (50 Gold)</button>
+              </div>
+              <div class="shop-card">
+                <h4>XP Potion</h4>
+                <p>+50 Instant XP ⚡</p>
+                <button onclick="buyPotion(30)">Buy (30 Gold)</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 4: DUNGEON BOSS -->
+        <section id="tab-boss" class="tab-content hidden">
+          <div class="card boss-card">
+            <h3>🐉 Boss Arena: Shadow Dragon</h3>
+            <div class="boss-hp-bar">
+              <div id="boss-hp" class="boss-hp-fill" style="width: 100%;"></div>
+            </div>
+            <p>Boss Health: <span id="boss-hp-text">500 / 500</span> HP</p>
+            <button id="attack-boss-btn">⚔️ Attack Boss (Requires 10 Gold)</button>
+          </div>
+        </section>
+      </main>
     </div>
   </div>
 
-  <!-- Firebase Scripts -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
