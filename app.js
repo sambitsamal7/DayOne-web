@@ -1,393 +1,319 @@
+// ==========================================================================
+// LIFE RPG - GAME LOGIC & SUPABASE INTEGRATION
+// ==========================================================================
+
+// 1. SUPABASE CLIENT INITIALIZATION
 const SUPABASE_URL = 'https://gqinymrhijiardfjvkoh.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdxaW55bXJoaWppYXJkZmp2a29oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyMTgwMzYsImV4cCI6MjEwNDc5NDAzNn0.TuM5bOIEg-ewNAD7fvxKkwWEh9z6IUXQ1qw33j-C-4U';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdxaW55bXJoaWppYXJkZmp2a29oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMzQ1NjcsImV4cCI6MjA1NjgxMDU2N30.PLACEHOLDER'; // Ensure your key matches index.html
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Initialize properly with 2 separate arguments:
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-// State tracking
+// State cache
 let currentUser = null;
-let currentStats = null;
+let userData = {
+  id: '',
+  email: '',
+  level: 1,
+  xp: 0,
+  max_xp: 100,
+  gold: 0,
+  strength: 10,
+  intellect: 10,
+  title: 'Shadow Initiate'
+};
+let bossHp = 500;
+const maxBossHp = 500;
 
-// ==========================================
 // 2. DOM ELEMENTS
-// ==========================================
-const authScreen = document.getElementById('auth-screen');
-const dashboard = document.getElementById('dashboard');
-const authForm = document.getElementById('auth-form');
-const emailInput = document.getElementById('email');
-const passwordInput = document.getElementById('password');
-const loginBtn = document.getElementById('login-btn');
-const signupBtn = document.getElementById('signup-btn');
-const logoutBtn = document.getElementById('logout-btn');
+const authContainer = document.getElementById('auth-container');
+const gameDashboard = document.getElementById('game-dashboard');
+const authEmail = document.getElementById('auth-email');
+const authPassword = document.getElementById('auth-password');
+const btnLogin = document.getElementById('btn-login');
+const btnSignup = document.getElementById('btn-signup');
+const btnLogout = document.getElementById('btn-logout');
 
-// Stats Elements
-const userDisplay = document.getElementById('user-display');
-const userLevel = document.getElementById('user-level');
-const userXp = document.getElementById('user-xp');
-const maxXp = document.getElementById('max-xp');
-const xpBar = document.getElementById('xp-bar');
-const userGold = document.getElementById('user-gold');
-const streakCount = document.getElementById('streak-count');
-const statStr = document.getElementById('stat-str');
-const statInt = document.getElementById('stat-int');
-const taskList = document.getElementById('task-list');
+const heroEmailEl = document.getElementById('hero-email');
+const heroTitleBadgeEl = document.getElementById('hero-title-badge');
+const statsLevelEl = document.getElementById('stats-level');
+const xpTextEl = document.getElementById('xp-text');
+const xpBarTrack = document.querySelector('.xp-bar-track');
+const statsGoldEl = document.getElementById('stats-gold');
+const attrStrEl = document.getElementById('attr-str');
+const attrIntEl = document.getElementById('attr-int');
 
-// Profile Elements
-const profileName = document.getElementById('profile-name');
-const profileTitle = document.getElementById('profile-title');
-const customTitleInput = document.getElementById('custom-title-input');
-const saveProfileBtn = document.getElementById('save-profile-btn');
-const profileCompletedCount = document.getElementById('profile-completed-count');
-const profileTotalGold = document.getElementById('profile-total-gold');
+const questForm = document.getElementById('quest-form');
+const questTitleInput = document.getElementById('quest-title');
+const questAttrSelect = document.getElementById('quest-attribute');
+const questListEl = document.getElementById('quest-list');
 
-// ==========================================
-// 3. SOUND SYNTHESIZER (Web Audio API)
-// ==========================================
-function playSFX(type) {
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
+const bossHpTextEl = document.getElementById('boss-hp-text');
+const bossHpTrack = document.querySelector('.boss-hp-track');
+const btnAttackBoss = document.getElementById('btn-attack-boss');
 
-    if (type === 'levelUp') {
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(440, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.3);
-      gain.gain.setValueAtTime(0.2, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.3);
-    } else if (type === 'complete') {
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(523.25, ctx.currentTime);
-      osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
-      gain.gain.setValueAtTime(0.15, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.25);
-    }
-  } catch (e) {
-    console.log('Audio disabled or blocked by browser.');
-  }
-}
+// 3. EVENT LISTENERS
+document.addEventListener('DOMContentLoaded', initApp);
 
-// ==========================================
-// 4. AUTHENTICATION LOGIC
-// ==========================================
-async function handleSignUp() {
-  const email = emailInput.value.trim();
-  const password = passwordInput.value.trim();
+btnLogin.addEventListener('click', handleLogin);
+btnSignup.addEventListener('click', handleSignup);
+btnLogout.addEventListener('click', handleLogout);
+questForm.addEventListener('submit', handleAddQuest);
+btnAttackBoss.addEventListener('click', handleAttackBoss);
 
-  if (!email || !password) return alert('Please enter both email and passcode.');
-
-  const { data, error } = await supabaseClient.auth.signUp({ email, password });
-
-  if (error) {
-    alert('Sign Up Error: ' + error.message);
-  } else if (data.user) {
-    currentUser = data.user;
-    await initializeUserData(data.user.id, email);
-    showDashboard();
-  }
-}
-
-async function handleLogIn() {
-  const email = emailInput.value.trim();
-  const password = passwordInput.value.trim();
-
-  if (!email || !password) return alert('Please enter both email and passcode.');
-
-  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-
-  if (error) {
-    alert('Log In Error: ' + error.message);
-  } else if (data.user) {
-    currentUser = data.user;
-    await loadUserData();
-    showDashboard();
-  }
-}
-
-async function handleLogOut() {
-  await supabaseClient.auth.signOut();
-  currentUser = null;
-  currentStats = null;
-  dashboard.classList.add('hidden');
-  authScreen.classList.remove('hidden');
-}
-
-// Attach Auth Listeners
-if (signupBtn) signupBtn.addEventListener('click', handleSignUp);
-if (loginBtn) loginBtn.addEventListener('click', handleLogIn);
-if (logoutBtn) logoutBtn.addEventListener('click', handleLogOut);
-
-// Prevent form page reload on submit
-if (authForm) {
-  authForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    handleLogIn();
-  });
-}
-
-// Check existing session on load
-window.addEventListener('DOMContentLoaded', async () => {
+// 4. AUTHENTICATION & INITIALIZATION
+async function initApp() {
   const { data: { session } } = await supabaseClient.auth.getSession();
-  if (session?.user) {
+  if (session) {
     currentUser = session.user;
     await loadUserData();
     showDashboard();
+  } else {
+    showAuth();
   }
-});
+}
 
-// ==========================================
-// 5. DATABASE PERSISTENCE & USER DATA
-// ==========================================
-async function initializeUserData(userId, email) {
-  const defaultData = {
+async function handleSignup(e) {
+  e.preventDefault();
+  const email = authEmail.value.trim();
+  const password = authPassword.value;
+
+  if (!email || !password) return alert('Please enter both email and password.');
+
+  const { data, error } = await supabaseClient.auth.signUp({ email, password });
+  if (error) return alert(`Sign up error: ${error.message}`);
+
+  currentUser = data.user;
+  if (currentUser) {
+    await createInitialProfile(currentUser.id, currentUser.email);
+    showDashboard();
+  }
+}
+
+async function handleLogin(e) {
+  e.preventDefault();
+  const email = authEmail.value.trim();
+  const password = authPassword.value;
+
+  if (!email || !password) return alert('Please enter both email and password.');
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+  if (error) return alert(`Login error: ${error.message}`);
+
+  currentUser = data.user;
+  await loadUserData();
+  showDashboard();
+}
+
+async function handleLogout() {
+  await supabaseClient.auth.signOut();
+  currentUser = null;
+  showAuth();
+}
+
+// 5. DATABASE OPERATIONS
+async function createInitialProfile(userId, email) {
+  const newProfile = {
     id: userId,
     email: email,
     level: 1,
     xp: 0,
     max_xp: 100,
     gold: 0,
-    streak: 1,
     strength: 10,
     intellect: 10,
-    title: 'Shadow Initiate',
-    quests_completed: 0,
-    last_login: new Date().toISOString()
+    title: 'Shadow Initiate'
   };
 
-  const { error } = await supabaseClient.from('user_data').insert([defaultData]);
-  if (error && error.code !== '23505') {
-    console.error('Error creating user profile:', error);
+  const { error } = await supabaseClient.from('user_data').insert([newProfile]);
+  if (error) {
+    console.error('Error creating profile:', error);
+  } else {
+    userData = newProfile;
   }
-  await loadUserData();
 }
 
 async function loadUserData() {
   if (!currentUser) return;
 
-  let { data, error } = await supabaseClient
+  const { data, error } = await supabaseClient
     .from('user_data')
     .select('*')
     .eq('id', currentUser.id)
     .single();
 
-  if (!data) {
-    await initializeUserData(currentUser.id, currentUser.email);
-    return;
+  if (data) {
+    userData = data;
+    updateUI();
+    loadQuests();
+  } else if (error) {
+    console.error('Error fetching user data:', error);
   }
-
-  currentStats = data;
-  updateUI();
-  await loadTasks();
 }
 
-function updateUI() {
-  if (!currentStats) return;
-
-  if (userDisplay) userDisplay.textContent = currentStats.email || 'Hero';
-  if (userLevel) userLevel.textContent = currentStats.level;
-  if (userXp) userXp.textContent = currentStats.xp;
-  if (maxXp) maxXp.textContent = currentStats.max_xp;
-  if (userGold) userGold.textContent = currentStats.gold;
-  if (streakCount) streakCount.textContent = currentStats.streak;
-  if (statStr) statStr.textContent = currentStats.strength;
-  if (statInt) statInt.textContent = currentStats.intellect;
-
-  if (profileName) profileName.textContent = currentStats.email.split('@')[0];
-  if (profileTitle) profileTitle.textContent = currentStats.title || 'Shadow Initiate';
-  if (profileCompletedCount) profileCompletedCount.textContent = currentStats.quests_completed || 0;
-  if (profileTotalGold) profileTotalGold.textContent = currentStats.gold;
-
-  const pct = Math.min((currentStats.xp / currentStats.max_xp) * 100, 100);
-  if (xpBar) xpBar.style.width = `${pct}%`;
-}
-
-function showDashboard() {
-  authScreen.classList.add('hidden');
-  dashboard.classList.remove('hidden');
-}
-
-// ==========================================
-// 6. QUEST & TASK MANAGEMENT
-// ==========================================
-async function loadTasks() {
+async function saveUserData() {
   if (!currentUser) return;
+  await supabaseClient.from('user_data').upsert(userData);
+}
 
-  const { data: tasks, error } = await supabaseClient
+// 6. QUEST SYSTEM
+async function handleAddQuest(e) {
+  e.preventDefault();
+  const title = questTitleInput.value.trim();
+  const attribute = questAttrSelect.value;
+
+  if (!title) return;
+
+  const newQuest = {
+    user_id: currentUser.id,
+    title: title,
+    attribute: attribute,
+    completed: false
+  };
+
+  const { data, error } = await supabaseClient.from('tasks').insert([newQuest]).select();
+  if (!error && data) {
+    questTitleInput.value = '';
+    renderQuestItem(data[0]);
+  }
+}
+
+async function loadQuests() {
+  questListEl.innerHTML = '';
+  const { data } = await supabaseClient
     .from('tasks')
     .select('*')
     .eq('user_id', currentUser.id)
-    .order('created_at', { ascending: false });
+    .eq('completed', false);
 
-  if (error) return console.error('Error fetching tasks:', error);
+  if (data) {
+    data.forEach(renderQuestItem);
+  }
+}
 
-  if (taskList) {
-    taskList.innerHTML = '';
-    tasks.forEach(task => {
-      const li = document.createElement('li');
-      li.className = `task-item ${task.completed ? 'completed' : ''}`;
-      li.innerHTML = `
-        <div>
-          <strong>${task.title}</strong>
-          <span class="badge">[+${task.attribute || 'STR'}]</span>
-        </div>
-        ${!task.completed ? `<button onclick="completeTask('${task.id}')">✔️ Complete</button>` : '<span>Done</span>'}
-      `;
-      taskList.appendChild(li);
+function renderQuestItem(quest) {
+  const li = document.createElement('li');
+  li.className = 'quest-item';
+  li.id = `quest-${quest.id}`;
+  li.innerHTML = `
+    <div>
+      <strong>[${quest.attribute}]</strong> ${quest.title}
+    </div>
+    <button class="btn btn-accent btn-small" onclick="completeQuest('${quest.id}', '${quest.attribute}')">✔️ COMPLETE</button>
+  `;
+  questListEl.appendChild(li);
+}
+
+window.completeQuest = async function(questId, attribute) {
+  await supabaseClient.from('tasks').update({ completed: true }).eq('id', questId);
+  const el = document.getElementById(`quest-${questId}`);
+  if (el) el.remove();
+
+  // Gain XP & Gold
+  userData.xp += 35;
+  userData.gold += 15;
+
+  if (attribute === 'STR') userData.strength += 1;
+  if (attribute === 'INT') userData.intellect += 1;
+
+  // Check Level Up
+  if (userData.xp >= userData.max_xp) {
+    userData.level += 1;
+    userData.xp -= userData.max_xp;
+    userData.max_xp = Math.floor(userData.max_xp * 1.5);
+    celebrateLevelUp(); // JUICE ANIMATION
+  }
+
+  updateUI();
+  saveUserData();
+};
+
+// 7. DUNGEON BOSS ENGINE
+function handleAttackBoss() {
+  const damage = userData.strength * 2 + userData.intellect;
+  bossHp = Math.max(0, bossHp - damage);
+
+  const fillPct = (bossHp / maxBossHp) * 100;
+  bossHpTrack.style.setProperty('--fill', `${fillPct}%`);
+  bossHpTextEl.innerText = `${bossHp} / ${maxBossHp}`;
+
+  if (bossHp === 0) {
+    alert('🎉 BOSS DEFEATED! Earned 100 Bonus Gold!');
+    userData.gold += 100;
+    bossHp = maxBossHp;
+    bossHpTrack.style.setProperty('--fill', `100%`);
+    bossHpTextEl.innerText = `${bossHp} / ${maxBossHp}`;
+    updateUI();
+    saveUserData();
+  }
+}
+
+// 8. VISUAL JUICE MOMENT (SCREEN FLASH + PARTICLE BURST)
+function celebrateLevelUp() {
+  // Radial Cyan Screen Flash
+  const flash = document.createElement('div');
+  flash.style.cssText = `
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle, rgba(0, 240, 255, 0.35), transparent 75%);
+    pointer-events: none;
+    z-index: 9999;
+    animation: flashPulse 0.6s ease-out forwards;
+  `;
+  document.body.appendChild(flash);
+  setTimeout(() => flash.remove(), 600);
+
+  // 24 Particle Radial Burst
+  for (let i = 0; i < 24; i++) {
+    const p = document.createElement('div');
+    const angle = (Math.PI * 2 * i) / 24;
+    const dist = 90 + Math.random() * 70;
+    p.style.cssText = `
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: ${i % 2 ? 'var(--accent-cyan)' : 'var(--accent-gold)'};
+      box-shadow: 0 0 10px currentColor;
+      pointer-events: none;
+      z-index: 9999;
+    `;
+    document.body.appendChild(p);
+
+    p.animate([
+      { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
+      { transform: `translate(${Math.cos(angle) * dist - 50}%, ${Math.sin(angle) * dist - 50}%) scale(0)`, opacity: 0 }
+    ], {
+      duration: 750,
+      easing: 'ease-out'
     });
+
+    setTimeout(() => p.remove(), 750);
   }
 }
 
-const taskForm = document.getElementById('task-form');
-if (taskForm) {
-  taskForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const titleInput = document.getElementById('task-title');
-    const attrInput = document.getElementById('task-attr');
+// 9. UI UPDATE & HELPER FUNCTIONS
+function updateUI() {
+  heroEmailEl.innerText = userData.email || 'HERO PROFILE';
+  heroTitleBadgeEl.innerText = userData.title || 'Shadow Initiate';
+  statsLevelEl.innerText = userData.level;
+  xpTextEl.innerText = `${userData.xp} / ${userData.max_xp}`;
+  statsGoldEl.innerText = userData.gold;
 
-    const title = titleInput.value.trim();
-    const attribute = attrInput.value;
+  attrStrEl.innerText = userData.strength;
+  attrIntEl.innerText = userData.intellect;
 
-    if (!title || !currentUser) return;
-
-    const { error } = await supabaseClient.from('tasks').insert([
-      { user_id: currentUser.id, title: title, attribute: attribute, completed: false }
-    ]);
-
-    if (!error) {
-      titleInput.value = '';
-      await loadTasks();
-    }
-  });
+  // Set CSS progress bar fill variable
+  const fillPct = (userData.xp / userData.max_xp) * 100;
+  xpBarTrack.style.setProperty('--fill', `${fillPct}%`);
 }
 
-window.completeTask = async function(taskId) {
-  const { error } = await supabaseClient
-    .from('tasks')
-    .update({ completed: true })
-    .eq('id', taskId);
-
-  if (!error) {
-    playSFX('complete');
-    currentStats.xp += 25;
-    currentStats.gold += 15;
-    currentStats.quests_completed = (currentStats.quests_completed || 0) + 1;
-
-    if (currentStats.xp >= currentStats.max_xp) {
-      currentStats.level += 1;
-      currentStats.xp -= currentStats.max_xp;
-      currentStats.max_xp = Math.floor(currentStats.max_xp * 1.5);
-      playSFX('levelUp');
-      alert(`🎉 LEVEL UP! You reached Level ${currentStats.level}!`);
-    }
-
-    await supabaseClient
-      .from('user_data')
-      .update({
-        xp: currentStats.xp,
-        max_xp: currentStats.max_xp,
-        level: currentStats.level,
-        gold: currentStats.gold,
-        quests_completed: currentStats.quests_completed
-      })
-      .eq('id', currentUser.id);
-
-    updateUI();
-    await loadTasks();
-  }
-};
-
-// ==========================================
-// 7. TAB NAVIGATION & OTHER ENGINE LOGIC
-// ==========================================
-document.querySelectorAll('.nav-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
-
-    btn.classList.add('active');
-    const targetTab = document.getElementById(btn.dataset.tab);
-    if (targetTab) targetTab.classList.remove('hidden');
-  });
-});
-
-if (saveProfileBtn) {
-  saveProfileBtn.addEventListener('click', async () => {
-    const newTitle = customTitleInput.value.trim();
-    if (!newTitle || !currentUser) return;
-
-    currentStats.title = newTitle;
-    await supabaseClient.from('user_data').update({ title: newTitle }).eq('id', currentUser.id);
-    customTitleInput.value = '';
-    updateUI();
-    alert('Title updated!');
-  });
+function showDashboard() {
+  authContainer.classList.add('hidden');
+  gameDashboard.classList.remove('hidden');
 }
 
-window.buyItem = async function(itemName, cost, statType, boost) {
-  if (!currentStats || currentStats.gold < cost) return alert('Not enough gold!');
-
-  currentStats.gold -= cost;
-  if (statType === 'STR') currentStats.strength += boost;
-  if (statType === 'INT') currentStats.intellect += boost;
-
-  await supabaseClient
-    .from('user_data')
-    .update({
-      gold: currentStats.gold,
-      strength: currentStats.strength,
-      intellect: currentStats.intellect
-    })
-    .eq('id', currentUser.id);
-
-  updateUI();
-  alert(`Purchased ${itemName}!`);
-};
-
-window.buyPotion = async function(cost) {
-  if (!currentStats || currentStats.gold < cost) return alert('Not enough gold!');
-
-  currentStats.gold -= cost;
-  currentStats.xp += 50;
-  if (currentStats.xp >= currentStats.max_xp) {
-    currentStats.level += 1;
-    currentStats.xp -= currentStats.max_xp;
-    currentStats.max_xp = Math.floor(currentStats.max_xp * 1.5);
-    playSFX('levelUp');
-  }
-
-  await supabaseClient
-    .from('user_data')
-    .update({ gold: currentStats.gold, xp: currentStats.xp, max_xp: currentStats.max_xp, level: currentStats.level })
-    .eq('id', currentUser.id);
-
-  updateUI();
-  alert('Drank XP Potion (+50 XP)!');
-};
-
-const attackBossBtn = document.getElementById('attack-boss-btn');
-if (attackBossBtn) {
-  attackBossBtn.addEventListener('click', () => {
-    if (!currentStats || currentStats.gold < 10) return alert('You need 10 Gold to strike the boss!');
-
-    currentStats.gold -= 10;
-    const bossHpText = document.getElementById('boss-hp-text');
-    const bossHpBar = document.getElementById('boss-hp');
-
-    let currentHp = parseInt(bossHpText.textContent) || 500;
-    let damage = Math.floor(Math.random() * 20) + currentStats.strength;
-    currentHp = Math.max(0, currentHp - damage);
-
-    bossHpText.textContent = `${currentHp} / 500`;
-    bossHpBar.style.width = `${(currentHp / 500) * 100}%`;
-
-    playSFX('complete');
-    updateUI();
-    alert(`💥 Struck the Shadow Dragon for ${damage} damage!`);
-  });
+function showAuth() {
+  gameDashboard.classList.add('hidden');
+  authContainer.classList.remove('hidden');
 }
